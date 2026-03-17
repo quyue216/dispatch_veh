@@ -1,17 +1,18 @@
 import { LinkOutlined } from '@ant-design/icons';
-import type { Settings as LayoutSettings } from '@ant-design/pro-components';
+import type {
+  Settings as LayoutSettings,
+  MenuDataItem,
+} from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import React from 'react';
+import { AvatarDropdown, AvatarName, Footer, Question } from '@/components';
 import {
-  AvatarDropdown,
-  AvatarName,
-  Footer,
-  Question,
-  SelectLang,
-} from '@/components';
-import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
+  getMenus,
+  currentUser as queryCurrentUser,
+} from '@/services/ant-design-pro/api';
+import { convertBackendMenus } from '@/utils/menu';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 import '@ant-design/v5-patch-for-react-19';
@@ -27,6 +28,7 @@ export async function getInitialState(): Promise<{
   currentUser?: API.CurrentUser;
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  menuData?: MenuDataItem[];
 }> {
   const fetchUserInfo = async () => {
     try {
@@ -39,6 +41,17 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
+  // 获取菜单数据
+  const fetchMenus = async () => {
+    try {
+      const res = await getMenus({ skipErrorHandler: true });
+      return res.data || [];
+    } catch (_error) {
+      return [];
+    }
+  };
+
   // 如果不是登录页面，执行
   const { location } = history;
   if (
@@ -47,9 +60,11 @@ export async function getInitialState(): Promise<{
     )
   ) {
     const currentUser = await fetchUserInfo();
+    const menuData = await fetchMenus();
     return {
       fetchUserInfo,
       currentUser,
+      menuData,
       settings: defaultSettings as Partial<LayoutSettings>,
     };
   }
@@ -65,10 +80,7 @@ export const layout: RunTimeLayoutConfig = ({
   setInitialState,
 }) => {
   return {
-    actionsRender: () => [
-      <Question key="doc" />,
-      <SelectLang key="SelectLang" />,
-    ],
+    actionsRender: () => [<Question key="doc" />],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
@@ -116,6 +128,10 @@ export const layout: RunTimeLayoutConfig = ({
         ]
       : [],
     menuHeaderRender: undefined,
+    // 动态菜单 - 从后端获取并转换格式
+    menuDataRender: () => {
+      return convertBackendMenus(initialState?.menuData || []);
+    },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     // 增加一个 loading 的状态

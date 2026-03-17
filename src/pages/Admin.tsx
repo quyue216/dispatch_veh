@@ -1,25 +1,14 @@
 import { HeartTwoTone, SmileTwoTone } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { useIntl } from '@umijs/max';
 import { Alert, Card, Typography } from 'antd';
 import React from 'react';
 
 const Admin: React.FC = () => {
-  const intl = useIntl();
   return (
-    <PageContainer
-      content={intl.formatMessage({
-        id: 'pages.admin.subPage.title',
-        defaultMessage: 'This page can only be viewed by admin',
-      })}
-    >
+    <PageContainer content="此页面仅管理员可见">
       <Card>
         <Alert
-          message={intl.formatMessage({
-            id: 'pages.welcome.alertMessage',
-            defaultMessage:
-              'Faster and stronger heavy-duty components have been released.',
-          })}
+          message="更快更强大的重型组件已发布。"
           type="success"
           showIcon
           banner
@@ -34,7 +23,7 @@ const Admin: React.FC = () => {
         </Typography.Title>
       </Card>
       <p style={{ textAlign: 'center', marginTop: 24 }}>
-        Want to add more pages? Please refer to{' '}
+        想要添加更多页面？请参考{' '}
         <a
           href="https://pro.ant.design/docs/block-cn"
           target="_blank"
