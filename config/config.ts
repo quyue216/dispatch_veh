@@ -16,7 +16,7 @@ const { REACT_APP_ENV = 'dev' } = process.env;
  */
 const PUBLIC_PATH: string = '/';
 
-import type { IConfig } from '@umijs/max';
+type IConfig = Parameters<typeof defineConfig>[0];
 
 const config: IConfig = defineConfig({
   /**
