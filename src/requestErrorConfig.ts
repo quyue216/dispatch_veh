@@ -2,12 +2,24 @@
 import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
 
-// 错误处理方案： 错误类型
+/**
+ *  错误展示类型枚举
+ *  定义后端返回错误时的不同展示方式
+ *  SILENT - 静默处理，适合一些非关键性的后台错误
+ *  ERROR_MESSAGE - 显示错误提示，适合普通业务错误
+ *  NOTIFICATION - 通知提醒，适合需要用户关注的错误
+ *  REDIRECT - 重定向到登录页或其他页面，通常用于 401 未授权等场景
+ */
 enum ErrorShowType {
+  /** 静默处理，不显示任何提示 */
   SILENT = 0,
+  /** 显示警告消息提示 */
   WARN_MESSAGE = 1,
+  /** 显示错误消息提示 */
   ERROR_MESSAGE = 2,
+  /** 显示通知提醒框 */
   NOTIFICATION = 3,
+  /** 重定向到指定页面 */
   REDIRECT = 9,
 }
 // 与后端约定的响应数据格式
