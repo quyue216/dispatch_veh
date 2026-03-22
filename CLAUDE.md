@@ -1,100 +1,100 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code (claude.ai/code) 提供代码仓库的工作指南。
 
-## Project Overview
+## 项目概览
 
-This is an Ant Design Pro project built with UmiJS Max (v4). It's a React enterprise application framework using React 19, Ant Design 5, and TypeScript.
+这是一个基于 UmiJS Max (v4) 构建的 Ant Design Pro 项目，使用 React 19、Ant Design 5 和 TypeScript 的企业级应用框架。
 
-## Common Commands
+## 常用命令
 
 ```bash
-# Install dependencies
+# 安装依赖
 npm install
 
-# Start development server (with mock)
+# 启动开发服务器（使用 mock 数据）
 npm start
 
-# Start development server without mock
+# 启动开发服务器（不使用 mock 数据）
 npm run start:no-mock
 
-# Start with specific environment (dev/test/pre)
-npm run start:dev    # Connects to dev backend
-npm run start:test   # Uses test environment proxy
+# 指定环境启动（dev/test/pre）
+npm run start:dev    # 连接开发后端
+npm run start:test   # 使用测试环境代理
 
-# Build for production
+# 生产构建
 npm run build
 
-# Preview production build
+# 预览生产构建
 npm run preview
 
-# Linting (Biome + TypeScript check)
+# 代码检查（Biome + TypeScript 检查）
 npm run lint
 
-# Fix lint errors
+# 修复代码检查错误
 npm run biome:lint
 
-# TypeScript type check
+# TypeScript 类型检查
 npm run tsc
 
-# Run tests
+# 运行测试
 npm test
 
-# Run tests with coverage
+# 运行测试并生成覆盖率报告
 npm run test:coverage
 
-# Generate API services from OpenAPI
+# 从 OpenAPI 生成 API 服务
 npm run openapi
 ```
 
-## Architecture
+## 架构
 
-### UmiJS Max Framework
+### UmiJS Max 框架
 
-The project uses UmiJS Max, which provides built-in plugins for:
-- **request**: HTTP client based on axios with unified error handling
-- **access**: Permission control based on user roles
-- **initialState**: Global initial state management (user info, settings)
-- **model**: Data flow plugin for state management
-- **locale**: Internationalization (i18n)
-- **layout**: ProLayout for admin UI
+项目使用 UmiJS Max，提供以下内置插件：
+- **request**: 基于 axios 的 HTTP 客户端，统一错误处理
+- **access**: 基于用户角色的权限控制
+- **initialState**: 全局初始状态管理（用户信息、设置）
+- **model**: 状态管理数据流插件
+- **locale**: 国际化 (i18n)
+- **layout**: ProLayout 管理后台 UI
 
-### Key Files
+### 关键文件
 
-| File | Purpose |
-|------|---------|
-| `src/app.tsx` | Runtime configuration: `getInitialState()` for user auth, `layout` for ProLayout config, `request` for API base URL |
-| `src/access.ts` | Permission definitions (e.g., `canAdmin`) based on `initialState.currentUser` |
-| `src/requestErrorConfig.ts` | Request/response interceptors and error handling |
-| `config/config.ts` | UmiJS configuration (routes, plugins, proxy, theme) |
-| `config/routes.ts` | Route definitions with `access` property for permission control |
-| `config/defaultSettings.ts` | ProLayout theme and layout settings |
+| 文件 | 用途 |
+|------|------|
+| `src/app.tsx` | 运行时配置：`getInitialState()` 用于用户认证，`layout` 用于 ProLayout 配置，`request` 用于 API 基础 URL |
+| `src/access.ts` | 权限定义（如 `canAdmin`），基于 `initialState.currentUser` |
+| `src/requestErrorConfig.ts` | 请求/响应拦截器和错误处理 |
+| `config/config.ts` | UmiJS 配置（路由、插件、代理、主题） |
+| `config/routes.ts` | 路由定义，包含用于权限控制的 `access` 属性 |
+| `config/defaultSettings.ts` | ProLayout 主题和布局设置 |
 
-### Directory Structure
+### 目录结构
 
 ```
 src/
-├── components/      # Shared components (Footer, HeaderDropdown, etc.)
-├── locales/         # i18n translations (zh-CN, en-US, etc.)
-├── pages/           # Route pages (each folder = route)
-├── services/        # API service functions (auto-generated from OpenAPI)
-│   ├── ant-design-pro/  # Main API services
-│   └── swagger/         # Swagger-generated services
-├── access.ts        # Permission definitions
-├── app.tsx          # Runtime configuration entry
-└── requestErrorConfig.ts  # HTTP error handling
+├── components/      # 共享组件（Footer、HeaderDropdown 等）
+├── locales/         # i18n 翻译（zh-CN、en-US 等）
+├── pages/           # 路由页面（每个文件夹 = 一个路由）
+├── services/        # API 服务函数（从 OpenAPI 自动生成）
+│   ├── ant-design-pro/  # 主 API 服务
+│   └── swagger/         # Swagger 生成的服务
+├── access.ts        # 权限定义
+├── app.tsx          # 运行时配置入口
+└── requestErrorConfig.ts  # HTTP 错误处理
 config/
-├── config.ts        # Main UmiJS config
-├── routes.ts        # Route definitions
-├── defaultSettings.ts  # Layout settings
-├── proxy.ts         # Dev proxy config
-└── oneapi.json      # OpenAPI schema for code generation
-mock/                # Mock data for development
+├── config.ts        # UmiJS 主配置
+├── routes.ts        # 路由定义
+├── defaultSettings.ts  # 布局设置
+├── proxy.ts         # 开发代理配置
+└── oneapi.json      # OpenAPI 代码生成配置
+mock/                # 开发用 mock 数据
 ```
 
-### Route Permissions
+### 路由权限
 
-Routes use the `access` property for permission control. The `access` value matches a key returned from `src/access.ts`:
+路由使用 `access` 属性进行权限控制。`access` 值与 `src/access.ts` 返回的键对应：
 
 ```typescript
 // config/routes.ts
@@ -104,15 +104,15 @@ Routes use the `access` property for permission control. The `access` value matc
 return { canAdmin: currentUser?.access === 'admin' }
 ```
 
-### API Layer
+### API 层
 
-Services are defined in `src/services/`. Use OpenAPI generation:
+服务定义在 `src/services/` 中。使用 OpenAPI 生成：
 
 ```bash
-npm run openapi  # Generates services from config/openapi.json
+npm run openapi  # 从 config/openapi.json 生成服务
 ```
 
-API requests use `@umijs/max` request with base URL configured in `src/app.tsx`:
+API 请求使用 `@umijs/max` 的请求功能，在 `src/app.tsx` 中配置基础 URL：
 
 ```typescript
 export const request = {
@@ -121,31 +121,64 @@ export const request = {
 };
 ```
 
-### Mock Development
+### Mock 开发
 
-Mock files are in `mock/` directory. They are automatically loaded when running `npm start` (without `MOCK=none`).
+Mock 文件位于 `mock/` 目录。运行 `npm start` 时（不使用 `MOCK=none`）会自动加载。
 
-### Testing
+### 测试
 
-Tests use Jest with `@testing-library/react`. Test setup is in `tests/setupTests.jsx`.
+测试使用 Jest 和 `@testing-library/react`。测试配置位于 `tests/setupTests.jsx`。
 
-## Environment Variables
+## 环境变量
 
-| Variable | Purpose |
-|----------|---------|
-| `REACT_APP_ENV` | Environment name: `dev`, `test`, `pre` (determines proxy config) |
-| `MOCK` | Set to `none` to disable mock server |
-| `UMI_ENV` | Umi environment (`dev`) |
-| `ANALYZE` | Set to `1` to analyze bundle size |
+| 变量 | 用途 |
+|------|------|
+| `REACT_APP_ENV` | 环境名称：`dev`、`test`、`pre`（决定代理配置） |
+| `MOCK` | 设置为 `none` 禁用 mock 服务器 |
+| `UMI_ENV` | Umi 环境（`dev`） |
+| `ANALYZE` | 设置为 `1` 分析打包体积 |
 
-## Code Style
+## 代码风格
 
-- Uses Biome for linting (not ESLint)
-- Single quotes for JavaScript/TypeScript
-- Space indentation
-- Lint excludes: `.umi`, `src/services`, `mock` directories
+- 使用 Biome 进行代码检查（不使用 ESLint）
+- JavaScript/TypeScript 使用单引号
+- 使用空格缩进
+- 代码检查排除：`.umi`、`src/services`、`mock` 目录
 
-## Path Aliases
+## 路径别名
 
-- `@/*` maps to `./src/*`
-- `@@/*` maps to `./src/.umi/*`
+- `@/*` 映射到 `./src/*`
+- `@@/*` 映射到 `./src/.umi/*`
+
+## 页面代码结构规范
+
+### 目录组织原则
+
+路由组件以**大驼峰命名**打平到 `pages` 下第一级，不在路由组件内部嵌套路由组件：
+
+```
+src/
+├── components/          # 多页面共用组件
+└── pages/
+    ├── Welcome/         # 路由组件（对应路由配置中的组件）
+    │   ├── components/  # 仅该页面使用的子组件（不超过三层）
+    │   ├── Form.tsx
+    │   ├── index.tsx    # 页面组件入口
+    │   └── index.less   # 页面样式
+    ├── Order/
+    │   ├── index.tsx
+    │   └── index.less
+    └── User/            # group 层级（复杂项目可增加）
+        ├── components/  # group 下公用组件
+        ├── Login/       # group 下的页面
+        ├── Register/    # group 下的页面
+        └── util.ts      # group 下共用方法
+```
+
+### 规范要点
+
+- **路由组件**：配置在 `config/routes.ts` 中的组件，放在 `pages/` 第一级，大驼峰命名
+- **非路由组件**：页面内部拆分的子组件，放在对应页面目录的 `components/` 下
+- **共用组件**：多个页面依赖的组件放到 `src/components/`，单页面依赖的就近维护
+- **嵌套层级**：页面内部组织建议不超过三层
+- **命名区分**：通过"是否在 `pages/` 第一级"来区分路由组件和非路由组件
