@@ -59,6 +59,7 @@ export const errorConfig: RequestConfig = {
     // 错误抛出
     errorThrower: (res) => {
       const { code, data, msg } = res as unknown as ResponseStructure;
+
       if (code !== 200) {
         const error: any = new Error(msg!);
         error.name = 'BizError';
@@ -99,7 +100,7 @@ export const errorConfig: RequestConfig = {
           } else if (code === 500) {
             // 服务器内部错误
             message.error(msg);
-            throw new Error(msg);
+            throw error;
           } else if (code === 601) {
             // 业务警告
             message.warning(msg);
@@ -140,9 +141,11 @@ export const errorConfig: RequestConfig = {
   // 响应拦截器
   responseInterceptors: [
     (response) => {
-      const { data } = response as unknown as ResponseStructure;
+      const data = response.data as ResponseStructure;
 
-      return data;
+      (data as any).success = data.code === 200;
+
+      return response;
     },
   ],
 };

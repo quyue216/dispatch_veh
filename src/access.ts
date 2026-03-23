@@ -6,6 +6,6 @@ export default function access(
 ) {
   const { currentUser } = initialState ?? {};
   return {
-    canAdmin: currentUser && currentUser.access === 'admin',
+    canAdmin: 'admin', //HACK 这里暂时返回admin
   };
 }

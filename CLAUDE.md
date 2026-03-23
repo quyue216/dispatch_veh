@@ -10,41 +10,41 @@
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
 # 启动开发服务器（使用 mock 数据）
-npm start
+pnpm start
 
 # 启动开发服务器（不使用 mock 数据）
-npm run start:no-mock
+pnpm run start:no-mock
 
 # 指定环境启动（dev/test/pre）
-npm run start:dev    # 连接开发后端
-npm run start:test   # 使用测试环境代理
+pnpm run start:dev    # 连接开发后端
+pnpm run start:test   # 使用测试环境代理
 
 # 生产构建
-npm run build
+pnpm run build
 
 # 预览生产构建
-npm run preview
+pnpm run preview
 
 # 代码检查（Biome + TypeScript 检查）
-npm run lint
+pnpm run lint
 
 # 修复代码检查错误
-npm run biome:lint
+pnpm run biome:lint
 
 # TypeScript 类型检查
-npm run tsc
+pnpm run tsc
 
 # 运行测试
-npm test
+pnpm test
 
 # 运行测试并生成覆盖率报告
-npm run test:coverage
+pnpm run test:coverage
 
 # 从 OpenAPI 生成 API 服务
-npm run openapi
+pnpm run openapi
 ```
 
 ## 架构

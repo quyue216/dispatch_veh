@@ -9,9 +9,11 @@ import { Alert, App } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
+import type { Except } from 'type-fest';
 import logoImg from '@/assets/logo.png';
 import { Footer } from '@/components';
 import { login } from '@/services/ant-design-pro/login';
+import { setToken } from '@/utils/auth';
 import Settings from '../../../../config/defaultSettings';
 
 const useStyles = createStyles(({ token }) => {
@@ -44,7 +46,11 @@ const LoginMessage: React.FC<{
 };
 
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
+  type LoginState = Except<API.LoginResult, 'data'>;
+  const [userLoginState, setUserLoginState] = useState<LoginState>({
+    code: 200,
+    msg: null,
+  });
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
@@ -66,8 +72,10 @@ const Login: React.FC = () => {
     try {
       // 登录
       const msg = await login({ ...values });
+      console.log('🚀 ~ handleSubmit ~ msg:', msg);
       if (msg.code === 200) {
         message.success('登录成功！');
+        setToken(msg.data.access_token);
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
         window.location.href = urlParams.get('redirect') || '/';
@@ -81,7 +89,6 @@ const Login: React.FC = () => {
       message.error('登录失败，请重试！');
     }
   };
-  const { status, type: loginType } = userLoginState;
 
   return (
     <div className={styles.container}>
@@ -128,8 +135,8 @@ const Login: React.FC = () => {
               await handleSubmit(values as API.LoginParams);
             }}
           >
-            {status === 'error' && loginType === 'account' && (
-              <LoginMessage content="账户或密码错误(admin/ant.design)" />
+            {userLoginState.code !== 200 && (
+              <LoginMessage content="账户或密码错误" />
             )}
             <ProFormText
               name="username"
