@@ -9,8 +9,9 @@ import { Alert, App } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
+import logoImg from '@/assets/logo.png';
 import { Footer } from '@/components';
-import { login } from '@/services/ant-design-pro/api';
+import { login } from '@/services/ant-design-pro/login';
 import Settings from '../../../../config/defaultSettings';
 
 const useStyles = createStyles(({ token }) => {
@@ -21,8 +22,7 @@ const useStyles = createStyles(({ token }) => {
       flexDirection: 'column',
       height: '100vh',
       overflow: 'auto',
-      backgroundImage:
-        "url('https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/V-_oS6r-i7wAAAAAAAAAAAAAFl94AQBr')",
+      backgroundImage: "url('/login-back.jpg')",
       backgroundSize: '100% 100%',
     },
   };
@@ -62,10 +62,11 @@ const Login: React.FC = () => {
   };
 
   const handleSubmit = async (values: API.LoginParams) => {
+    console.log('🚀 ~ handleSubmit ~ values:', values);
     try {
       // 登录
-      const msg = await login({ ...values, type: 'account' });
-      if (msg.status === 'ok') {
+      const msg = await login({ ...values });
+      if (msg.code === 200) {
         message.success('登录成功！');
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
@@ -93,71 +94,89 @@ const Login: React.FC = () => {
       <div
         style={{
           flex: '1',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           padding: '32px 0',
         }}
       >
-        <LoginForm
-          contentStyle={{
-            minWidth: 280,
-            maxWidth: '75vw',
-          }}
-          logo={<img alt="logo" src="/logo.svg" />}
-          title="Ant Design"
-          initialValues={{
-            autoLogin: true,
-          }}
-          onFinish={async (values) => {
-            await handleSubmit(values as API.LoginParams);
-          }}
-        >
-          {status === 'error' && loginType === 'account' && (
-            <LoginMessage content="账户或密码错误(admin/ant.design)" />
-          )}
-          <ProFormText
-            name="username"
-            fieldProps={{
-              size: 'large',
-              prefix: <UserOutlined />,
+        <div style={{ width: 400 }}>
+          <LoginForm
+            contentStyle={{
+              minWidth: 280,
+              maxWidth: '75vw',
             }}
-            placeholder="用户名: admin or user"
-            rules={[
-              {
-                required: true,
-                message: '请输入用户名!',
-              },
-            ]}
-          />
-          <ProFormText.Password
-            name="password"
-            fieldProps={{
-              size: 'large',
-              prefix: <LockOutlined />,
+            containerStyle={{
+              backgroundColor: '#ffffff',
+              borderRadius: 12,
+              padding: '32px 40px 16px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+              width: 'fit-content',
+              height: 'fit-content',
             }}
-            placeholder="密码: ant.design"
-            rules={[
-              {
-                required: true,
-                message: '请输入密码！',
-              },
-            ]}
-          />
-          <div
-            style={{
-              marginBottom: 24,
+            logo={<img alt="logo" src={logoImg} />}
+            title={
+              <span style={{ fontSize: 36, fontWeight: 700 }}>
+                浦发养护集团
+              </span>
+            }
+            subTitle={<span style={{ fontSize: 18 }}>车辆调度平台</span>}
+            initialValues={{
+              autoLogin: true,
+            }}
+            onFinish={async (values) => {
+              await handleSubmit(values as API.LoginParams);
             }}
           >
-            <ProFormCheckbox noStyle name="autoLogin">
-              自动登录
-            </ProFormCheckbox>
-            <a
+            {status === 'error' && loginType === 'account' && (
+              <LoginMessage content="账户或密码错误(admin/ant.design)" />
+            )}
+            <ProFormText
+              name="username"
+              fieldProps={{
+                size: 'large',
+                prefix: <UserOutlined />,
+              }}
+              placeholder="请输入用户名"
+              rules={[
+                {
+                  required: true,
+                  message: '请输入用户名!',
+                },
+              ]}
+            />
+            <ProFormText.Password
+              name="password"
+              fieldProps={{
+                size: 'large',
+                prefix: <LockOutlined />,
+              }}
+              placeholder="请输入密码"
+              rules={[
+                {
+                  required: true,
+                  message: '请输入密码！',
+                },
+              ]}
+            />
+            <div
               style={{
-                float: 'right',
+                marginBottom: 24,
               }}
             >
-              忘记密码
-            </a>
-          </div>
-        </LoginForm>
+              <ProFormCheckbox noStyle name="autoLogin">
+                自动登录
+              </ProFormCheckbox>
+              <a
+                style={{
+                  float: 'right',
+                }}
+              >
+                忘记密码
+              </a>
+            </div>
+          </LoginForm>
+        </div>
       </div>
       <Footer />
     </div>

@@ -24,9 +24,12 @@ declare namespace API {
   };
 
   type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
+    code: number;
+    msg: string | null;
+    data: {
+      access_token: string;
+      expires_in: number;
+    };
   };
 
   type PageParams = {
@@ -62,10 +65,8 @@ declare namespace API {
   };
 
   type LoginParams = {
-    username?: string;
-    password?: string;
-    autoLogin?: boolean;
-    type?: string;
+    username: string;
+    password: string;
   };
 
   type ErrorResponse = {
