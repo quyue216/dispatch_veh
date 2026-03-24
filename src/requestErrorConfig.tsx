@@ -1,8 +1,9 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import { WarningFilled } from '@ant-design/icons';
 import type { RequestConfig } from '@umijs/max';
+import { history } from '@umijs/max';
 import { Modal, message, notification } from 'antd';
-import { getToken } from './utils/auth';
+import { getToken, removeToken } from './utils/auth';
 
 const { confirm } = Modal;
 
@@ -41,6 +42,27 @@ const errorMsg: {
   default: '系统未知错误，请反馈给管理员',
 };
 
+const loginOut = async () => {
+  removeToken();
+
+  const { search, pathname } = window.location;
+
+  const urlParams = new URL(window.location.href).searchParams;
+
+  const searchParams = new URLSearchParams({
+    redirect: pathname + search,
+  });
+  /** 此方法会跳转到 redirect 参数所在的位置 */
+  const redirect = urlParams.get('redirect');
+  // Note: There may be security issues, please note
+  if (window.location.pathname !== '/user/login' && !redirect) {
+    history.replace({
+      pathname: '/user/login',
+      search: searchParams.toString(),
+    });
+  }
+};
+
 // 与后端约定的响应数据格式
 interface ResponseStructure {
   code: number;
@@ -69,6 +91,7 @@ export const errorConfig: RequestConfig = {
     },
     // 错误接收及处理
     errorHandler: (error: any, opts: any) => {
+      console.log('🚀 ~ error:', error);
       if (opts?.skipErrorHandler) throw error;
       // 我们的 errorThrower 抛出的错误。
       if (error.name === 'BizError') {
@@ -77,11 +100,14 @@ export const errorConfig: RequestConfig = {
           const { code, msg: resMsg } = errorInfo;
 
           const msg = errorMsg[code] || resMsg || errorMsg['default'];
+          console.log('🚀 ~ msg:', msg);
 
           // token过期
           if (code === 401) {
             if (!isInvalid.result) {
               isInvalid.result = true;
+              console.log('系统提示');
+
               confirm({
                 title: '系统提示',
                 icon: <WarningFilled />,
@@ -91,6 +117,7 @@ export const errorConfig: RequestConfig = {
                 onOk() {
                   //TODO 清楚用户信息
                   isInvalid.result = false;
+                  loginOut();
                 },
                 onCancel() {
                   isInvalid.result = false;
@@ -98,6 +125,7 @@ export const errorConfig: RequestConfig = {
               });
             }
           } else if (code === 500) {
+            console.log('🚀 ~ code === 500:', code === 500);
             // 服务器内部错误
             message.error(msg);
             throw error;
