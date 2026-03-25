@@ -91,7 +91,6 @@ export const errorConfig: RequestConfig = {
     },
     // 错误接收及处理
     errorHandler: (error: any, opts: any) => {
-      console.log('🚀 ~ error:', error);
       if (opts?.skipErrorHandler) throw error;
       // 我们的 errorThrower 抛出的错误。
       if (error.name === 'BizError') {
@@ -100,7 +99,6 @@ export const errorConfig: RequestConfig = {
           const { code, msg: resMsg } = errorInfo;
 
           const msg = errorMsg[code] || resMsg || errorMsg['default'];
-          console.log('🚀 ~ msg:', msg);
 
           // token过期
           if (code === 401) {
@@ -125,7 +123,6 @@ export const errorConfig: RequestConfig = {
               });
             }
           } else if (code === 500) {
-            console.log('🚀 ~ code === 500:', code === 500);
             // 服务器内部错误
             message.error(msg);
             throw error;

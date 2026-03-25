@@ -3,7 +3,7 @@ import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
-import { AvatarDropdown, AvatarName, Footer, Question } from '@/components';
+import { AvatarDropdown, AvatarName, Footer } from '@/components';
 import { getUserInfo as queryCurrentUser } from '@/services/ant-design-pro/login';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
@@ -23,12 +23,11 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
+      const msg = await queryCurrentUser({});
       return msg;
     } catch (_error) {
-      history.push(loginPath);
+      console.log('🚀 ~ fetchUserInfo ~ _error:', _error);
+      // history.push(loginPath);
     }
     return undefined;
   };
@@ -54,25 +53,17 @@ export const layout: RunTimeLayoutConfig = ({
   setInitialState,
 }) => {
   return {
-    actionsRender: () => [<Question key="doc" />],
     avatarProps: {
-      src: initialState?.currentUser?.user.avatar,
+      src: 'https://www.shpfyh.com/static/img/avatar.19c66b61.jpg',
       title: <AvatarName />,
       render: (_, avatarChildren) => {
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
+        return <AvatarDropdown menu>{avatarChildren}</AvatarDropdown>;
       },
     },
     waterMarkProps: {
       content: initialState?.currentUser?.user.userName,
     },
     footerRender: () => <Footer />,
-    onPageChange: () => {
-      const { location } = history;
-      // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
-      }
-    },
     bgLayoutImgList: [
       {
         src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
