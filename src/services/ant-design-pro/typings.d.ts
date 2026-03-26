@@ -299,5 +299,16 @@ declare namespace API {
     deptId?: number;
     /** 状态 */
     status?: number;
+    tx?:number;
+  };
+
+  /** 设备编码列表项 */
+  type DeviceSnItem = {
+    /** 主键ID */
+    id: number;
+    /** 设备编码 */
+    deviceSn: string;
+    /** 车牌号 */
+    carPlate: string;
   };
 }

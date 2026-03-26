@@ -49,3 +49,10 @@ export async function getCarList(data: API.CarListParams) {
     data,
   });
 }
+
+/** 获取设备编码列表（用于下拉选择） */
+export async function getDeviceSnList() {
+  return request<API.ResultInfo<API.DeviceSnItem[]>>('/huanwei/vehicle/device/deviceSnList', {
+    method: 'GET',
+  });
+}

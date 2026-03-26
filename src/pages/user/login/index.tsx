@@ -185,7 +185,7 @@ const Login: React.FC = () => {
           </LoginForm>
         </div>
       </div>
-      <Footer />
+      <Footer inverted />
     </div>
   );
 };

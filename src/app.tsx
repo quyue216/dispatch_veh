@@ -60,9 +60,6 @@ export const layout: RunTimeLayoutConfig = ({
         return <AvatarDropdown menu>{avatarChildren}</AvatarDropdown>;
       },
     },
-    waterMarkProps: {
-      content: initialState?.currentUser?.user.userName,
-    },
     footerRender: () => <Footer />,
     bgLayoutImgList: [
       {
