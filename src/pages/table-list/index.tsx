@@ -1,31 +1,28 @@
-import type {
-  ActionType,
-  ProColumns,
-  ProDescriptionsItemProps,
-} from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
   FooterToolbar,
   PageContainer,
-  ProDescriptions,
   ProTable,
 } from '@ant-design/pro-components';
 import { useRequest } from '@umijs/max';
-import { Button, Drawer, Input, message } from 'antd';
+import { Button, message } from 'antd';
 import React, { useCallback, useRef, useState } from 'react';
-import { removeRule, rule } from '@/services/ant-design-pro/api';
+import { Except } from 'type-fest';
+import {
+  listVheDevice as getList,
+  delVheDevice as removeListItem,
+} from '@/services/ant-design-pro/device';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
 const TableList: React.FC = () => {
   const actionRef = useRef<ActionType | null>(null);
 
-  const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { run: delRun, loading } = useRequest(removeRule, {
+  const { run: delRun, loading } = useRequest(removeListItem, {
     manual: true,
     onSuccess: () => {
       setSelectedRows([]);
@@ -38,72 +35,44 @@ const TableList: React.FC = () => {
     },
   });
 
-  const columns: ProColumns<API.RuleListItem>[] = [
+  const columns: ProColumns<API.AddVheDeviceParams>[] = [
     {
-      title: '规则名称',
-      dataIndex: 'name',
-      render: (dom, entity) => {
-        return (
-          <a
-            onClick={() => {
-              setCurrentRow(entity);
-              setShowDetail(true);
-            }}
-          >
-            {dom}
-          </a>
-        );
-      },
+      title: '设备编码',
+      dataIndex: 'deviceSn',
+      copyable: true,
     },
     {
-      title: '描述',
-      dataIndex: 'desc',
-      valueType: 'textarea',
+      title: '车牌号',
+      dataIndex: 'carPlate',
     },
     {
-      title: '服务调用次数',
-      dataIndex: 'callNo',
-      sorter: true,
-      hideInForm: true,
-      renderText: (val: string) => `${val} 万`,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      hideInForm: true,
+      title: '设备类型',
+      dataIndex: 'deviceType',
       valueEnum: {
-        0: {
-          text: '关闭',
-          status: 'Default',
-        },
-        1: {
-          text: '运行中',
-          status: 'Processing',
-        },
-        2: {
-          text: '已上线',
-          status: 'Success',
-        },
-        3: {
-          text: '异常',
-          status: 'Error',
-        },
+        1: { text: 'GPS定位器' },
+        2: { text: '行车记录仪' },
+        3: { text: '油耗监测仪' },
       },
     },
     {
-      title: '上次调度时间',
-      sorter: true,
-      dataIndex: 'updatedAt',
-      valueType: 'dateTime',
-      renderFormItem: (item, { defaultRender, ...rest }, form) => {
-        const status = form.getFieldValue('status');
-        if (`${status}` === '0') {
-          return false;
-        }
-        if (`${status}` === '3') {
-          return <Input {...rest} placeholder="请输入异常原因！" />;
-        }
-        return defaultRender(item);
+      title: '设备型号',
+      dataIndex: 'deviceModel',
+    },
+    {
+      title: '安装时间',
+      dataIndex: 'installDate',
+      valueType: 'date',
+    },
+    {
+      title: '填报人',
+      dataIndex: 'inputBy',
+    },
+    {
+      title: '启用状态',
+      dataIndex: 'status',
+      valueEnum: {
+        0: { text: '禁用', status: 'Default' },
+        1: { text: '启用', status: 'Success' },
       },
     },
     {
@@ -112,13 +81,13 @@ const TableList: React.FC = () => {
       valueType: 'option',
       render: (_, record) => [
         <UpdateForm
-          trigger={<a>配置</a>}
-          key="config"
+          trigger={<a>编辑</a>}
+          key="edit"
           onOk={actionRef.current?.reload}
           values={record}
         />,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          订阅警报
+        <a key="delete" onClick={() => handleRemove([record as any])}>
+          删除
         </a>,
       ],
     },
@@ -138,11 +107,7 @@ const TableList: React.FC = () => {
         return;
       }
 
-      await delRun({
-        data: {
-          key: selectedRows.map((row) => row.key),
-        },
-      });
+      await delRun(selectedRows.join(','));
     },
     [delRun, messageApi.warning],
   );
@@ -150,7 +115,7 @@ const TableList: React.FC = () => {
   return (
     <PageContainer>
       {contextHolder}
-      <ProTable<API.RuleListItem, API.PageParams>
+      <ProTable<API.VheDeviceItem, API.PageParams>
         headerTitle="查询表格"
         actionRef={actionRef}
         rowKey="key"
@@ -160,7 +125,22 @@ const TableList: React.FC = () => {
         toolBarRender={() => [
           <CreateForm key="create" reload={actionRef.current?.reload} />,
         ]}
-        request={rule}
+        request={async (params) => {
+          const { pageSize, current, ...rest } = params;
+
+          const queryParams = {
+            ...rest,
+            pageSize,
+            pageNum: current,
+          };
+
+          const res = await getList(queryParams);
+          return {
+            data: res.rows,
+            total: res.total,
+            success: res.code === 200,
+          };
+        }}
         columns={columns}
         rowSelection={{
           onChange: (_, selectedRows) => {
@@ -194,33 +174,8 @@ const TableList: React.FC = () => {
           >
             批量删除
           </Button>
-          <Button type="primary">批量审批</Button>
         </FooterToolbar>
       )}
-
-      <Drawer
-        width={600}
-        open={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
-        }}
-        closable={false}
-      >
-        {currentRow?.name && (
-          <ProDescriptions<API.RuleListItem>
-            column={2}
-            title={currentRow?.name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.name,
-            }}
-            columns={columns as ProDescriptionsItemProps<API.RuleListItem>[]}
-          />
-        )}
-      </Drawer>
     </PageContainer>
   );
 };

@@ -166,4 +166,138 @@ declare namespace API {
     permissions: string[];
     admin: boolean;
   };
+
+  // ===================== 通用响应类型 =====================
+
+  /** 通用响应结果 */
+  type ResultInfo<T = any> = {
+    code: number;
+    msg: string;
+    data: T;
+  };
+
+  /** 分页列表响应结果 */
+  type TableResultInfo<T = any> = {
+    code: number;
+    msg: string;
+    rows: T[];
+    total: number;
+  };
+
+  // ===================== 设备台账相关类型 =====================
+
+  /** 车辆绑定记录实体 */
+  type VheDeviceItem = {
+    /** 主键ID */
+    id?: number;
+    /** 设备编码 */
+    deviceSn?: string;
+    /** 车牌号 */
+    carPlate?: string;
+    /** 设备类型 */
+    deviceType?: number;
+    /** 设备型号 */
+    deviceModel?: string;
+    /** 安装时间 */
+    installDate?: string;
+    /** 填报人 */
+    inputBy?: string;
+    /** 启用状态 */
+    status?: number;
+    /** 创建人 */
+    createBy?: string;
+    /** 创建时间 */
+    createTime?: string;
+    /** 更新人 */
+    updateBy?: string;
+    /** 更新时间 */
+    updateTime?: string;
+  };
+
+  /** 车辆绑定记录详情（复用 VheDeviceItem） */
+  type VheDeviceDetail = VheDeviceItem;
+
+  /** 列表查询参数 */
+  type ListVheDeviceParams = {
+    /** 页码 */
+    pageNum?: number;
+    /** 每页数量 */
+    pageSize?: number;
+    /** 设备编码 */
+    deviceSn?: string;
+    /** 车牌号 */
+    carPlate?: string;
+    /** 设备类型 */
+    deviceType?: number;
+    /** 启用状态 */
+    status?: number;
+  };
+
+  /** 新增车辆绑定记录参数 */
+  type AddVheDeviceParams = {
+    /** 设备编码 */
+    deviceSn: string;
+    /** 车牌号 */
+    carPlate: string;
+    /** 设备类型 */
+    deviceType: number;
+    /** 设备型号 */
+    deviceModel?: string;
+    /** 安装时间 */
+    installDate?: string;
+    /** 填报人 */
+    inputBy?: string;
+    /** 启用状态 */
+    status?: number;
+  };
+
+  /** 修改车辆绑定记录参数 */
+  type UpdateVheDeviceParams = {
+    /** 主键ID */
+    id: number;
+    /** 设备编码 */
+    deviceSn?: string;
+    /** 车牌号 */
+    carPlate?: string;
+    /** 设备类型 */
+    deviceType?: number;
+    /** 设备型号 */
+    deviceModel?: string;
+    /** 安装时间 */
+    installDate?: string;
+    /** 填报人 */
+    inputBy?: string;
+    /** 启用状态 */
+    status?: number;
+  };
+
+  /** 车辆列表项 */
+  type CarListItem = {
+    /** 车辆ID */
+    id?: number;
+    /** 车牌号 */
+    carPlate?: string;
+    /** 车辆类型 */
+    carType?: number;
+    /** 车辆名称 */
+    carName?: string;
+    /** 所属部门 */
+    deptId?: number;
+    /** 部门名称 */
+    deptName?: string;
+    /** 状态 */
+    status?: number;
+  };
+
+  /** 车辆列表查询参数 */
+  type CarListParams = {
+    /** 车牌号 */
+    carPlate?: string;
+    /** 车辆类型 */
+    carType?: number;
+    /** 所属部门 */
+    deptId?: number;
+    /** 状态 */
+    status?: number;
+  };
 }
