@@ -1,32 +1,69 @@
-import { PlusOutlined } from '@ant-design/icons';
 import {
   type ActionType,
   ModalForm,
+  ProFormDatePicker,
+  ProFormRadio,
+  ProFormSelect,
   ProFormText,
-  ProFormTextArea,
 } from '@ant-design/pro-components';
-import { useRequest } from '@umijs/max';
-import { Button, message } from 'antd';
+import { useModel, useRequest } from '@umijs/max';
+import { Col, message, Row } from 'antd';
 import type { FC } from 'react';
-import { addRule } from '@/services/ant-design-pro/api';
+import { getCarList } from '@/services/ant-design-pro/device';
 
 interface CreateFormProps {
   reload?: ActionType['reload'];
+  title?: string;
+  trigger: React.ReactNode;
+  onSubmit?: (values: { [prop: PropertyKey]: any }) => Promise<void>;
+  initialValues?: { [prop: PropertyKey]: any };
 }
+/*
+弹框表单功能
+1. 详情
+  1.1 表单项禁用
+  1.2 数据项回显
+  1.3 footer取消显示
+2. 新增
+  1.表单数据收集
+  2.表单数据检验
+  3.表单数据提交，消息提示成功or失败
+3. 修改
+  2.表单数据检验
+  3.表单数据提交，消息提示成功or失败
 
+*/
 const CreateForm: FC<CreateFormProps> = (props) => {
-  const { reload } = props;
+  const {
+    reload,
+    title = '设备详情',
+    trigger,
+    onSubmit = () => {},
+    initialValues = {},
+  } = props;
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { run, loading } = useRequest(addRule, {
+  const { initialState: { currentUser } = {} } = useModel('@@initialState');
+
+  if (title === '新增设备台账') {
+    const fromDefault = {
+      inputBy: currentUser?.user?.nickName,
+      installDate: Date.now(),
+      status: 0,
+    };
+
+    Object.assign(initialValues, fromDefault);
+  }
+
+  const { run, loading } = useRequest(onSubmit, {
     manual: true,
     onSuccess: () => {
-      messageApi.success('添加成功');
+      messageApi.success('操作成功');
       reload?.();
     },
     onError: () => {
-      messageApi.error('添加失败，请重试！');
+      messageApi.error('操作失败，请重试！');
     },
   });
 
@@ -34,31 +71,106 @@ const CreateForm: FC<CreateFormProps> = (props) => {
     <>
       {contextHolder}
       <ModalForm
-        title="新建规则"
-        trigger={
-          <Button type="primary" icon={<PlusOutlined />}>
-            新建
-          </Button>
-        }
-        width="400px"
-        modalProps={{ okButtonProps: { loading } }}
-        onFinish={async (value) => {
-          await run({ data: value as API.RuleListItem });
-
+        title={title}
+        trigger={trigger}
+        width={720}
+        disabled={title === '设备详情'}
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 18 }}
+        modalProps={{
+          okButtonProps: { loading },
+          destroyOnClose: true,
+          footer: title === '设备详情' ? null : undefined,
+        }}
+        initialValues={initialValues}
+        onFinish={async (value: API.RuleListItem) => {
+          await run(value);
           return true;
         }}
       >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: '请输入规则名称！',
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
+        <Row gutter={24}>
+          <Col span={12}>
+            <ProFormText
+              name="deviceSn"
+              label="设备编码"
+              placeholder="请输入设备编码"
+              rules={[{ required: true, message: '请输入设备编码' }]}
+            />
+          </Col>
+          <Col span={12}>
+            <ProFormSelect
+              name="deviceType"
+              label="设备类型"
+              placeholder="请选择设备类型"
+              rules={[{ required: true, message: '请选择设备类型' }]}
+              valueEnum={{
+                0: '行车记录仪',
+                1: 'GPS',
+                2: '车载屏幕',
+                3: '计算盒子',
+              }}
+            />
+          </Col>
+          <Col span={12}>
+            <ProFormText
+              name="deviceModel"
+              label="设备型号"
+              placeholder="请输入设备型号"
+              rules={[{ required: true, message: '请输入设备型号' }]}
+            />
+          </Col>
+          <Col span={12}>
+            <ProFormSelect
+              name="carPlate"
+              label="车牌"
+              placeholder="请选择车牌号"
+              rules={[{ required: true, message: '请选择车牌号' }]}
+              showSearch
+              fieldProps={{
+                virtual: true,
+              }}
+              request={async () => {
+                const res = await getCarList({ tx: 0 });
+                //@ts-expect-error
+                return res.data.map((item) => ({
+                  label: item.cphm,
+                  value: item.cphm,
+                }));
+              }}
+            />
+          </Col>
+          <Col span={12}>
+            <ProFormDatePicker
+              name="installDate"
+              label="安装日期"
+              placeholder="请选择安装日期"
+              disabled
+              rules={[{ required: true, message: '请选择安装日期' }]}
+              fieldProps={{
+                format: 'YYYY-MM-DD',
+                style: { width: '100%' },
+              }}
+            />
+          </Col>
+          <Col span={12}>
+            <ProFormText
+              name="inputBy"
+              label="填报人"
+              placeholder="请输入填报人"
+              disabled
+            />
+          </Col>
+          <Col span={24}>
+            <ProFormRadio.Group
+              name="status"
+              label="使用状态"
+              options={[
+                { label: '正常', value: '1' },
+                { label: '停用', value: '0' },
+              ]}
+            />
+          </Col>
+        </Row>
       </ModalForm>
     </>
   );

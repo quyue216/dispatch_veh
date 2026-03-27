@@ -1,20 +1,18 @@
+import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import {
-  FooterToolbar,
-  PageContainer,
-  ProTable,
-} from '@ant-design/pro-components';
+import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { useRequest } from '@umijs/max';
 import { Button, message, Space } from 'antd';
 import React, { useCallback, useRef, useState } from 'react';
 import {
+  addVheDevice as addList,
+  updateVheDevice as editList,
   getCarList,
   getDeviceSnList,
   listVheDevice as getList,
   delVheDevice as removeListItem,
 } from '@/services/ant-design-pro/device';
 import CreateForm from './components/CreateForm';
-import UpdateForm from './components/UpdateForm';
 
 const TableList: React.FC = () => {
   const actionRef = useRef<ActionType | null>(null);
@@ -23,7 +21,7 @@ const TableList: React.FC = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { run: delRun, loading } = useRequest(removeListItem, {
+  const { run: delRun } = useRequest(removeListItem, {
     manual: true,
     onSuccess: () => {
       setSelectedRows([]);
@@ -134,12 +132,10 @@ const TableList: React.FC = () => {
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <UpdateForm
-            trigger={<a>编辑</a>}
-            key="edit"
-            onOk={actionRef.current?.reload}
-            values={record}
-          />
+          <CreateForm
+            initialValues={record}
+            trigger={<a key="edit">编辑</a>}
+          ></CreateForm>
           <a key="delete" onClick={() => handleRemove([record as any])}>
             删除
           </a>
@@ -172,9 +168,43 @@ const TableList: React.FC = () => {
       {contextHolder}
       <ProTable<API.VheDeviceItem, API.PageParams>
         actionRef={actionRef}
-        headerTitle={
-          <CreateForm key="create" reload={actionRef.current?.reload} />
-        }
+        headerTitle={[
+          <Space key="toolbar">
+            {(
+              [
+                {
+                  title: '新增设备台账',
+                  trigger: (
+                    <Button type="primary" icon={<PlusOutlined />}>
+                      新建
+                    </Button>
+                  ),
+                  onSubmit: addList,
+                  initialValues: {},
+                },
+                {
+                  title: '修改设备台账',
+                  trigger: (
+                    <Button
+                      disabled={selectedRowsState.length !== 1}
+                      icon={<EditOutlined />}
+                    >
+                      修改
+                    </Button>
+                  ),
+                  initialValues: { ...selectedRowsState[0] },
+                  onSubmit: editList,
+                },
+              ] as const
+            ).map((prop) => (
+              <CreateForm
+                key={prop.title}
+                {...prop}
+                reload={actionRef.current?.reload}
+              />
+            ))}
+          </Space>,
+        ]}
         rowKey="deviceSn"
         search={{
           labelWidth: 120,
