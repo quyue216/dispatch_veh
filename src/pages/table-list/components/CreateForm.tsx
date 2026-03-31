@@ -7,16 +7,16 @@ import {
   ProFormText,
 } from '@ant-design/pro-components';
 import { useModel, useRequest } from '@umijs/max';
-import { Col, message, Row } from 'antd';
+import { Col, Form, message, Row } from 'antd';
 import type { FC } from 'react';
 import { getCarList } from '@/services/ant-design-pro/device';
 
-interface CreateFormProps {
+interface CreateFormProps<T = any> {
   reload?: ActionType['reload'];
   title?: string;
   trigger: React.ReactNode;
-  onSubmit?: (values: { [prop: PropertyKey]: any }) => Promise<void>;
-  initialValues?: { [prop: PropertyKey]: any };
+  onSubmit?: (values: T) => Promise<any>;
+  initialValues?: T;
 }
 /*
 弹框表单功能
@@ -43,18 +43,21 @@ const CreateForm: FC<CreateFormProps> = (props) => {
   } = props;
 
   const [messageApi, contextHolder] = message.useMessage();
+  const [form] = Form.useForm();
 
   const { initialState: { currentUser } = {} } = useModel('@@initialState');
 
-  if (title === '新增设备台账') {
-    const fromDefault = {
-      inputBy: currentUser?.user?.nickName,
-      installDate: Date.now(),
-      status: 0,
-    };
-
-    Object.assign(initialValues, fromDefault);
-  }
+  const getDefaultValues = () => {
+    if (title === '新增设备台账') {
+      return {
+        ...initialValues,
+        inputBy: currentUser?.user?.nickName,
+        installDate: Date.now(),
+        status: '1',
+      };
+    }
+    return initialValues;
+  };
 
   const { run, loading } = useRequest(onSubmit, {
     manual: true,
@@ -71,6 +74,7 @@ const CreateForm: FC<CreateFormProps> = (props) => {
     <>
       {contextHolder}
       <ModalForm
+        form={form}
         title={title}
         trigger={trigger}
         width={720}
@@ -82,9 +86,17 @@ const CreateForm: FC<CreateFormProps> = (props) => {
           destroyOnClose: true,
           footer: title === '设备详情' ? null : undefined,
         }}
-        initialValues={initialValues}
-        onFinish={async (value: API.RuleListItem) => {
-          await run(value);
+        onOpenChange={(open) => {
+          if (open) {
+            form.setFieldsValue(getDefaultValues());
+          }
+        }}
+        onFinish={async (value: API.AddVheDeviceParams) => {
+          const params = {
+            ...value,
+            inputBy: currentUser?.user.userId,
+          };
+          await run(params);
           return true;
         }}
       >

@@ -17,7 +17,9 @@ import CreateForm from './components/CreateForm';
 const TableList: React.FC = () => {
   const actionRef = useRef<ActionType | null>(null);
 
-  const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
+  const [selectedRowsState, setSelectedRows] = useState<API.VheDeviceItem[]>(
+    [],
+  );
 
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -196,13 +198,19 @@ const TableList: React.FC = () => {
                   onSubmit: editList,
                 },
               ] as const
-            ).map((prop) => (
-              <CreateForm
-                key={prop.title}
-                {...prop}
-                reload={actionRef.current?.reload}
-              />
-            ))}
+            ).map((prop) => {
+              return (
+                <CreateForm
+                  key={
+                    prop.title === '修改设备台账'
+                      ? `edit-${selectedRowsState[0]?.deviceSn}`
+                      : prop.title
+                  }
+                  {...prop}
+                  reload={actionRef.current?.reload}
+                />
+              );
+            })}
           </Space>,
         ]}
         rowKey="deviceSn"
