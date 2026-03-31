@@ -79,8 +79,8 @@ const CreateForm: FC<CreateFormProps> = (props) => {
         trigger={trigger}
         width={720}
         disabled={title === '设备详情'}
-        labelCol={{ span: 6 }}
-        wrapperCol={{ span: 18 }}
+        labelCol={{ span: 7 }}
+        wrapperCol={{ span: 15 }}
         modalProps={{
           okButtonProps: { loading },
           destroyOnClose: true,
@@ -93,10 +93,13 @@ const CreateForm: FC<CreateFormProps> = (props) => {
         }}
         onFinish={async (value: API.AddVheDeviceParams) => {
           const params = {
+            ...initialValues,
             ...value,
             inputBy: currentUser?.user.userId,
           };
+
           await run(params);
+
           return true;
         }}
       >

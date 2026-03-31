@@ -2,7 +2,7 @@ import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { useRequest } from '@umijs/max';
-import { Button, message, Space } from 'antd';
+import { Button, Modal, message, Space } from 'antd';
 import React, { useCallback, useRef, useState } from 'react';
 import {
   addVheDevice as addList,
@@ -23,7 +23,7 @@ const TableList: React.FC = () => {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { run: delRun } = useRequest(removeListItem, {
+  const { run: delListItem } = useRequest(removeListItem, {
     manual: true,
     onSuccess: () => {
       setSelectedRows([]);
@@ -132,19 +132,41 @@ const TableList: React.FC = () => {
       dataIndex: 'option',
       align: 'center',
       valueType: 'option',
-      render: (_, record) => (
-        <Space>
-          <CreateForm
-            initialValues={record}
-            trigger={<a key="edit">编辑</a>}
-          ></CreateForm>
-          <a key="delete" onClick={() => handleRemove([record as any])}>
-            删除
-          </a>
-        </Space>
-      ),
+      render: (_, record) => {
+        return (
+          <Space>
+            <CreateForm
+              initialValues={record}
+              trigger={<a key="edit">详情</a>}
+            ></CreateForm>
+            <CreateForm
+              title="修改设备台账"
+              initialValues={record}
+              trigger={<a key="edit">编辑</a>}
+              onSubmit={editList}
+            ></CreateForm>
+            <a
+              key="delete"
+              onClick={() => showDeleteConfirm(String(record.id))}
+            >
+              删除
+            </a>
+          </Space>
+        );
+      },
     },
   ];
+
+  const showDeleteConfirm = (deviceSn: string) => {
+    Modal.confirm({
+      title: '删除确认',
+      content: '确定要删除该设备吗？此操作不可恢复。',
+      okText: '确定',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: () => handleRemove([deviceSn]),
+    });
+  };
 
   /**
    *  Delete node
@@ -153,16 +175,10 @@ const TableList: React.FC = () => {
    * @param selectedRows
    */
   const handleRemove = useCallback(
-    async (selectedRows: API.RuleListItem[]) => {
-      if (!selectedRows?.length) {
-        messageApi.warning('请选择删除项');
-
-        return;
-      }
-
-      await delRun(selectedRows.join(','));
+    async (selectedRows: Array<string>) => {
+      await delListItem(selectedRows.join(','));
     },
-    [delRun, messageApi.warning],
+    [delListItem, messageApi.warning],
   );
 
   return (
