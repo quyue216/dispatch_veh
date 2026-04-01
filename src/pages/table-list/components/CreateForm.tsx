@@ -8,11 +8,11 @@ import {
 } from '@ant-design/pro-components';
 import { useModel, useRequest } from '@umijs/max';
 import { Col, Form, message, Row } from 'antd';
-import type { FC } from 'react';
+import type { FC, RefObject } from 'react';
 import { getCarList } from '@/services/ant-design-pro/device';
 
 interface CreateFormProps<T = any> {
-  reload?: ActionType['reload'];
+  actionRef?: RefObject<ActionType | null>;
   title?: string;
   trigger: React.ReactNode;
   onSubmit?: (values: T) => Promise<any>;
@@ -35,13 +35,12 @@ interface CreateFormProps<T = any> {
 */
 const CreateForm: FC<CreateFormProps> = (props) => {
   const {
-    reload,
+    actionRef,
     title = '设备详情',
     trigger,
     onSubmit = () => {},
     initialValues = {},
   } = props;
-
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
 
@@ -63,7 +62,7 @@ const CreateForm: FC<CreateFormProps> = (props) => {
     manual: true,
     onSuccess: () => {
       messageApi.success('操作成功');
-      reload?.();
+      actionRef?.current?.reload();
     },
     onError: () => {
       messageApi.error('操作失败，请重试！');

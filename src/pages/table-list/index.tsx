@@ -137,13 +137,15 @@ const TableList: React.FC = () => {
           <Space>
             <CreateForm
               initialValues={record}
-              trigger={<a key="edit">详情</a>}
+              trigger={<a key="detail">详情</a>}
+              actionRef={actionRef}
             ></CreateForm>
             <CreateForm
               title="修改设备台账"
               initialValues={record}
               trigger={<a key="edit">编辑</a>}
               onSubmit={editList}
+              actionRef={actionRef}
             ></CreateForm>
             <a
               key="delete"
@@ -223,7 +225,7 @@ const TableList: React.FC = () => {
                       : prop.title
                   }
                   {...prop}
-                  reload={actionRef.current?.reload}
+                  actionRef={actionRef}
                 />
               );
             })}

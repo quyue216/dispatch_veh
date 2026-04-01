@@ -105,3 +105,67 @@ const CreateForm: FC<CreateFormProps> = (props) => {
 
 - [Ant Design ModalForm 文档](https://procomponents.ant.design/components/modal-form)
 - [React key 机制](https://react.dev/learn/rendering-lists#why-does-react-need-keys)
+
+---
+
+## 2026-04-01: actionRef.current 在渲染阶段为 null 导致回调无效
+
+### 问题描述
+
+在 ProTable 页面中，CreateForm 组件需要调用 `actionRef.current.reload()` 刷新表格，但传递的 `reload` 函数始终为 `undefined`。
+
+### 错误代码
+
+```tsx
+// 父组件
+<CreateForm
+  reload={actionRef.current?.reload}  // 渲染时取值，此时为 undefined
+/>
+
+// 子组件
+const { reload } = props;
+
+onSuccess: () => {
+  reload?.();  // undefined，无效果
+}
+```
+
+### 原因分析
+
+1. **渲染时机问题**：`actionRef.current` 在组件初次渲染时为 `null`，ProTable 挂载后才会赋值。
+
+2. **值传递 vs 引用传递**：`reload={actionRef.current?.reload}` 是在渲染阶段取值，此时得到 `undefined`，之后不会自动更新。
+
+3. **闭包陷阱**：子组件拿到的 `reload` 是渲染时的快照值，而非响应式引用。
+
+### 解决方案
+
+传递 `actionRef` 引用本身，在回调执行时才取值：
+
+```tsx
+// 父组件
+<CreateForm actionRef={actionRef} />
+
+// 子组件
+interface CreateFormProps {
+  actionRef?: React.MutableRefObject<ActionType | null>;
+}
+
+const { actionRef } = props;
+
+onSuccess: () => {
+  actionRef?.current?.reload();  // 回调执行时取值，此时已有值
+}
+```
+
+### 经验总结
+
+| 场景 | 错误做法 | 正确做法 |
+|------|----------|----------|
+| 传递 ref 方法 | `fn={ref.current?.fn}` | 传递 ref 本身，调用时取值 |
+| 需要最新值 | 在渲染阶段取值 | 在回调/事件处理阶段取值 |
+
+### 相关文档
+
+- [React useRef](https://react.dev/reference/react/useRef)
+- [ProTable ActionType](https://procomponents.ant.design/components/table#actiontype)
