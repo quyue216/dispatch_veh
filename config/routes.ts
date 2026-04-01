@@ -46,10 +46,10 @@ export default [
     ],
   },
   {
-    name: '查询表格',
+    name: '设备管理',
     icon: 'table',
-    path: '/list',
-    component: './table-list',
+    path: '/device-list',
+    component: './device-list',
   },
   {
     path: '/',
