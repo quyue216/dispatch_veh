@@ -5,12 +5,27 @@ import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import { AvatarDropdown, AvatarName, Footer } from '@/components';
 import { getUserInfo as queryCurrentUser } from '@/services/ant-design-pro/login';
+import { getToken } from '@/utils/auth';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 import '@ant-design/v5-patch-for-react-19';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
+const whiteList = [loginPath]; // 白名单，不需要登录的页面
+
+/**
+ * 路由守卫：每次路由变化时检查登录状态
+ */
+export function onRouteChange() {
+  const { pathname } = history.location;
+  const token = getToken();
+
+  // 未登录且不在白名单，跳转登录页
+  if (!token && !whiteList.includes(pathname)) {
+    history.replace(loginPath);
+  }
+}
 
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
@@ -22,12 +37,19 @@ export async function getInitialState(): Promise<{
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
   const fetchUserInfo = async () => {
+    // 没有 token 时直接跳转登录页，不调用 API
+    const token = getToken();
+    if (!token) {
+      history.replace(loginPath);
+      return undefined;
+    }
     try {
       const msg = await queryCurrentUser({});
       return msg;
     } catch (_error) {
       console.log('🚀 ~ fetchUserInfo ~ _error:', _error);
-      // history.push(loginPath);
+      // 路由守卫充当
+      history.replace(loginPath);
     }
     return undefined;
   };
